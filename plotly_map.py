@@ -14,6 +14,9 @@ import plotly.express as px
 import plotly.io as pio
 import plotly.graph_objects as go
 pio.renderers.default='browser'
+import dash
+import dash_core_components as dcc
+import dash_html_components as html
 
 # Pre processing
 
@@ -49,7 +52,7 @@ fig_reg.update_geos(fitbounds='locations', visible=False)
 fig_reg.update_layout(title_text='Regional GVA Nowcasting', title_font_size=25, 
                   title_x = 0.5)
 
-fig_reg.show()
+#fig_reg.show()
 
 # Heatmap
 
@@ -58,22 +61,72 @@ melt_reduced = melt.loc[melt['Year'] > '2012 Q1']
 piv = melt_reduced.pivot("Region", "Year", "value")
 fig_map = px.imshow(piv, color_continuous_scale=px.colors.diverging.Spectral)
 fig_map.layout.height=500
-fig_map.show()
+#fig_map.show()
+
+# Line graph
+
+fig_line = px.line(melt, x='Year', y='value', color='Region')
+#fig_line.show()
 
 # Dash 
 
 
-import dash
-import dash_core_components as dcc
-import dash_html_components as html
+external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
-app = dash.Dash()
+app = dash.Dash(__name__, external_stylesheets=external_stylesheets) 
 app.layout = html.Div([
-    dcc.Graph(figure=fig_map, 
-    style={'width':'49%', 'display':'inline-block'}),
-    dcc.Graph(figure=fig_reg,
-    style={'width':'49%', 'display':'inline-block'})
-])
 
-app.run_server(debug=False, use_reloader=False)  # Turn off reloader if inside Jupyter
+    html.H1("Regional GVA Nowcasting", style={'text-align':'center'}),
+    
+    dcc.Dropdown(id='my-dropdown', value='2012 Q2',
+                 options=[{'label': x, 'value': x} for x in
+                          melt_reduced.Year.unique()]),
+    dcc.Graph(id='my-graph', figure={}),
+    dcc.Graph(
+        id='line-graph',
+        figure={}),
+    ])
+
+@app.callback(
+    dash.dependencies.Output(component_id='my-graph', component_property='figure'),
+    dash.dependencies.Input(component_id='my-dropdown', component_property='value')
+)
+def update_graph(year_chosen):
+    dff = melt_reduced[melt_reduced.Year == year_chosen]
+    fig = px.choropleth(dff, 
+                    locations='id', 
+                    geojson=regions, 
+              color='value', 
+              scope='europe')
+    fig.update_geos(fitbounds='locations', visible=False)
+    return fig
+
+@app.callback(
+    dash.dependencies.Output(component_id='line-graph', component_property='figure'),
+    dash.dependencies.Input(component_id='my-graph', component_property='hoverData'),
+    dash.dependencies.Input(component_id='my-dropdown', component_property='value')
+)
+def update_side_graph(hov_data, region_chosen):
+    if hov_data is None:
+        dff2 = melt_reduced[melt_reduced.Region == region_chosen]
+        dff2 = dff2[dff2.Region == 'East']
+
+        fig2 = px.line(dff2, x='Year', y='value')
+
+        return fig2
+    else:
+
+
+        dff2 = melt_reduced[melt_reduced.Region == region_chosen]
+        hov_region = hov_data['points'][0]['x']
+        dff2 = dff2[dff2.Region == hov_region]
+        fig2 = px.line(dff2, x='Year', y='value')
+        return fig2
+
+if __name__ == '__main__':
+    app.run_server(debug=False)
+
+
+
+    
 
