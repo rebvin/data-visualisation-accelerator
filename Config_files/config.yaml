@@ -1,0 +1,23 @@
+---
+# Configuration File
+
+# Set working directory
+
+
+geojson_ITL1: Inputs\International_Territorial_Level_1_(May_2021)_UK_BUC.geojson
+model_GVA_ITL1: Inputs\February_Regional_Growth.xlsx
+root_mean:  Inputs\rsme_fake.csv
+confidence_interval: Inputs\b6c6022b.csv
+ons_logo: branding.png
+
+geojson_ITL2: ITL2\International_Territorial_Level_2_(May_2021)_UK_BUC.geojson
+model_GVA_ITL2: ITL2\itl2_faked.csv
+
+model_GVA_ITL3: ITL3\itl3_faked_data.csv
+geojson_ITL3: ITL3\International_Territorial_Level_3_(May_2021)_UK_BUC.geojson
+region_list_ITL3: ITL3\itl3_regions.xlsx
+
+start_year: '2012 Q1'
+end_year: '2020 Q4'
+
+

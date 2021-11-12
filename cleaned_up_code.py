@@ -37,6 +37,7 @@ with open("./Config_files/config.yaml") as file:
 ITL1_regions = json.load(open(config["geojson_ITL1"], 'r'))
 ITL1_GVA = pd.read_excel(config['model_GVA_ITL1'], sheet_name='Real')
 root_mean = pd.read_csv(config['root_mean'])
+root_mean = root_mean.rename(columns={'Unnamed: 0': 'Region'})
 confidence_interval = pd.read_csv(config['confidence_interval'])
 ons_logo = config['ons_logo']
 
@@ -90,8 +91,9 @@ melt2['id'] = melt2['Region'].apply(lambda x:region_id_map[x])
 
 ITL3_GVA = pd.read_csv(config['model_GVA_ITL3'])
 geojson_ITL3 = json.load(open(config['geojson_ITL3'], 'r'))
-ITL3_regions = pd.read_excel(config['region_list_ITL3'])
-ITL3_region_list = ITL3_regions.columns.to_list()
+#ITL3_regions = pd.read_excel(config['region_list_ITL3']) #file not present
+#ITL3_region_list = ITL3_regions.columns.to_list()
+ITL3_region_list = ITL3_GVA.columns.tolist()[1:]
 
 
 melt3 = pd.melt(ITL3_GVA, id_vars=['Year'], value_vars=ITL3_region_list)
